@@ -1,0 +1,324 @@
+#:kivy 1.9
+#: import font data.fonts.font
+#: import os os
+#: import re re
+
+
+<CTextInput@TextInput>:
+	multiline: False
+	font_size: 12
+	#font_name: "C:/Windows/Fonts/calibri.ttf"
+
+<Label>:
+	mipmap: True
+	markup: True
+	color: 1,1,1,1
+
+<Button>:
+	background_normal: "ui/images/images.png"
+
+<Popup>:
+	background: "ui/images/images.png"
+
+<FaButton@Button>:
+	font_name: "./data/fonts/fontawesome.ttf"
+
+<FaLabel@Label>:
+	font_name: "./data/fonts/fontawesome.ttf"
+
+<CBoxLayout@BoxLayout>:
+	canvas:
+		Color:
+			rgba: 1,1,1,1
+		Rectangle:
+			size: self.size
+			pos: self.pos
+			source: "ui/images/images.png"
+
+
+<PBar>:
+	size: root.size
+	canvas.before:
+		Color:
+			rgba: root.bg_color
+		Rectangle:
+			size: self.size
+			pos: self.pos
+
+		Color:
+			rgba: root.color
+		Rectangle:
+			size: root.per, self.height - 2
+			pos: self.x +1, self.y+1
+	on_size: root._set_per()
+
+	Label:
+		id: per_label
+		color: 0,0,0,1
+		bold: True
+		size: self.texture_size
+		center: root.center
+		text: "%"+str(root._per*100)
+		on_touch_down: root.on_touch()
+
+<DownloadWatcher>:
+	canvas:
+		Color:
+			rgba: 1,1,1,1
+		Rectangle:
+			size: self.size
+			pos: self.pos
+			source: "ui/images/images.png"
+
+	pbar: _pbar
+	orientation: "vertical"
+	size_hint_y: None
+	height: 100
+
+	BoxLayout:
+		size_hint_y: None
+		height: 70
+		
+		FaLabel:
+			markup: True
+			id: file_type_label
+			size_hint: None, None
+			size: 70, 70
+			font_size: 64
+			#text: chr(font["fa"][root.file_group+"_o"])
+		
+		GridLayout:
+			cols: 2
+			
+			BoxLayout:
+				orientation: "vertical"
+				size_hint_y: .6
+				Label:
+					text_size: self.width, None
+					halign: "left"
+					bold: True
+					id: dname
+					shorten: True
+					text: ""
+				Label:
+					text_size: self.width, None
+					halign: "left"
+					bold: True
+					id: durl
+					shorten: True
+					text: ""
+			
+			AnchorLayout:
+				anchor_x: "right"
+				anchor_y: "top"
+				BoxLayout:
+					id: b_set
+					size_hint: None, None
+					size: 78,28
+					
+					FaButton:
+						id: pause
+						size_hint: None, None
+						font_size: 20
+						size: 25, 25
+						text: chr(font["fa"]["pause"])
+						on_release: root.pause_download(self, self.text)
+				
+					FaButton:
+						id:stop
+						size_hint: None, None
+						size: 25, 25
+						font_size: 20
+					    text: chr(font["fa"]["stop"])
+					    on_release: root.stop_download(self)
+				
+					FaButton:
+						id: trash
+						size_hint: None, None
+						size: 25, 25
+						font_size: 20
+						text: chr(font["fa"]["trash"])
+						on_release:
+							root.stop_download(self)
+							app.root.remove_download(root)
+
+			Label:
+				id: dstat
+				size_hint: .3, .7
+				text_size: self.width, None
+				halign: "left"
+				shorten: True
+				text: ""
+			Label:
+				id: speed_remain
+				size_hint: .7, .7
+				#text_size: self.width, None
+				halign: "left"
+				text: ""
+
+	Widget:
+		id: _pbar
+		size: root.width, 30
+		canvas.before:
+			Color:
+				rgba: 1,1,1,1
+			Rectangle:
+				size: self.width - 20, self.height - 6
+				pos: self.x +10, self.y+3
+
+			Color:
+				rgba: root.color
+			Rectangle:
+				size: root.per, self.height - 8
+				pos: self.x +11, self.y+4
+		on_size: root.on_value(self,1) 
+
+
+		Label:
+			id: per_label
+			color: 0,0,0,1
+			bold: True
+			size: root.width, 30
+			pos: _pbar.pos
+			text: ""
+
+<AddPop>:
+	auto_dismiss: False
+	size_hint: None, None
+	size: 600, 250
+
+	BoxLayout:
+		orientation: "vertical"
+		
+		GridLayout:
+			cols: 3
+			spacing: 5
+			padding: 30
+			Label:
+				text: "URL giriniz:"
+				size_hint_x: .2
+
+			CTextInput:
+				id: url_text
+				multiline: False
+				focus: True
+				size_hint_y: None
+				height: self.minimum_height
+				on_text: 
+					self.text = re.sub("\s","",self.text)
+
+			Label:
+				size_hint_x: None
+				width: 50
+				text:""
+
+			Label:
+				id: ky
+				size_hint_x: .2
+
+			CTextInput:
+				id: save_text
+				size_hint_x: .7
+				size_hint_y: None
+				height: self.minimum_height
+				text: os.path.join(os.path.expanduser("~"),"Downloads")
+				on_text: self.text = re.sub("\s","",self.text)
+			
+			Button:
+				size_hint_x: .1
+				text:"..."
+				background_normal: "ui/images/images.png"
+				on_release: app.root.choose_file()
+		
+		BoxLayout:
+			size_hint_y: None
+			height: 40
+		
+			CheckBox:
+				id: check
+				size_hint_x: None
+				width: 40
+		
+			Label:
+				text_size: self.width, None
+				text: "Verilen adresteki videoyu bul."
+				markup: True
+				halign: "left"
+
+			Button:
+				text: "Tamam"
+				size_hint: None, None
+				size: 80,40
+				on_release: 
+					root.dismiss()
+					app.root.add_download(url_text.text, check.active)
+		
+			Button:
+				id: ib
+				size_hint: None, None
+				size: 80,40
+				on_release: root.dismiss()
+
+
+
+<RootWindow>:
+	spacing: 2
+	padding: 2
+	orientation: "vertical"
+
+			
+	BoxLayout:
+		size_hint_y: None
+		height: 80
+		canvas:
+			Color:
+				rgba: 1,1,1,1
+			Rectangle:
+				size: self.size
+				pos: self.pos
+				source: "ui/images/images.png"
+		FaButton:
+			font_size: 60
+			size_hint: None, None
+			size: 80, 80
+			text: chr(font["fa"]["plus"])
+			on_release: root.show_popup()
+		
+		FaButton:
+			font_size: 60
+			size_hint: None, None
+			size: 80, 80
+			text: chr(font["fa"]["clock_o"])
+			on_release: app.show_sched()
+		
+		FaButton:
+			font_size: 60
+			size_hint: None, None
+			size: 80, 80
+			text: chr(font["fa"]["gears"])
+
+
+
+	BoxLayout:
+		id: ba
+		spacing: 2
+	
+		CBoxLayout:
+			size_hint_x: None
+			width: 200
+			TreeView:
+				
+		ScrollView:
+			id: sview
+			scroll_type: ["bars"]
+			bar_width: "10dp"
+			do_scroll_x: False
+			
+			GridLayout:
+				id: downlist
+				cols:1
+				size_hint: None, None
+				width: sview.width-10
+				height: self.minimum_height
+				spacing: 2
+
